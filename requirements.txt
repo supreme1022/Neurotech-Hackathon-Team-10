@@ -1,0 +1,5 @@
+﻿numpy>=1.24,<3
+scipy>=1.10,<2
+mne>=1.9,<2
+antio>=0.5,<1
+matplotlib>=3.7,<4
