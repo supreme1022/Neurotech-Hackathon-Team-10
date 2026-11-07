@@ -1,220 +1,101 @@
-﻿# PhoniFide: Neurotech Hackathon Nov 2026
+﻿# PhoniFide: How to run the EEG pipeline
 
-Gaze calibration and classification from ANT Neuro EEG channels F7, F8, Fp1
-and Fp2. The pipeline supports ANT CNT / EDF recordings and an existing LSL EEG
-stream. It detects eye-movement signals present in frontal EEG; it does not
-estimate screen coordinates.
+**Record the eyes following the dot → create a calibration file → replay the EEG to see predicted gaze directions.**
 
-## Setup
+## 1. Open the project
 
-Python 3.10+ is required. On this Windows machine, use the existing conda
-environment so SciPy can find its numerical DLLs:
+Open **Anaconda PowerShell Prompt** and paste:
 
 ```powershell
+Set-Location "C:\Users\sajan\Documents\github_repos\Neurotech-Hackathon-Team-10"
 conda activate neurotech-hackathon
-python -m pip install -r requirements.txt
-# Optional, for EEG streaming or calibration marker output:
-python -m pip install -r requirements-live.txt
 ```
 
-The existing environment already contains these libraries. Installation is only
-needed when setting up a new environment. Alternatively prefix commands with
-`conda run --no-capture-output -n neurotech-hackathon`.
+Keep using this window for the commands below. This computer already has the required packages.
 
-## 1. Collect a complete labeled session
+## 2. Record the participant
 
-Start ANT recording externally before starting the GUI protocol. The GUI does
-not control ANT acquisition or verify that its recorder is running.
+If you already recorded with the updated GUI, saved its session file, and measured the start time described below, skip to step 3.
+
+1. Start EEG recording in the ANT software. Include channels **F7, F8, Fp1, and Fp2**.
+2. Run this command:
+
+   ```powershell
+   python calibration_GUI.py --output output/session.json
+   ```
+
+3. Check the recording confirmation box in the GUI, then press **Space**.
+4. Have the participant follow the dot without moving their head. During BLINK instructions, blink about once per second while looking at the center.
+5. Wait about **4 minutes**, until the GUI says calibration is complete. Then stop ANT recording.
+
+The GUI saves `output/session.json`. **Keep it: it tells calibration when each target appeared.** The GUI does not start or stop ANT recording.
+
+### One timing detail you must record
+
+You need the EEG recording's elapsed time when the **first dot appears**. This is called the **offset**.
+
+**Example:** EEG recording starts, then the first dot appears 12.34 seconds later. Your offset is `12.34`.
+
+Measure this using a recording of both the GUI and the EEG elapsed-time display, or another verified timing method. It is **not** the time you press Space; the GUI has a countdown. Do not guess the offset or assume it is zero.
+
+If you already recorded but have neither this timing information nor saved acquisition markers, the scripts cannot reliably match EEG to the targets. See [timing alternatives](docs/advanced.md#synchronization-is-required).
+
+## 3. Put the recording in this folder
+
+For these examples, name your CNT file **`recording.cnt`** and place it alongside `calibration.py`. Keep the matching GUI log at **`output/session.json`**.
+
+You should have:
+
+```text
+Neurotech-Hackathon-Team-10/
+    recording.cnt
+    calibration.py
+    calibration_GUI.py
+    real_time_classification.py
+    output/
+        session.json
+```
+
+If you ran the GUI on another computer, copy its session file here too.
+
+## 4. Create the calibration file
+
+Paste this command, replacing **`12.34` with your measured offset**:
 
 ```powershell
-python calibration_GUI.py --output output/session.json
-# If your acquisition setup can record the marker stream:
-python calibration_GUI.py --output output/session_lsl.json --lsl-markers
+python calibration.py recording.cnt --session output/session.json --reference CPz --offset 12.34
 ```
 
-Confirm external recording in the GUI and press Space. Follow each dot with your
-eyes while keeping your head still. During BLINK trials, blink about once per
-second while looking at center. Escape aborts and saves an unusable partial
-session rather than labeling it complete.
+`CPz` must be the reference electrode used by ANT during recording. Replace it if your acquisition settings use another reference.
 
-Defaults take about 4 minutes: an 8-second initial center period, three
-repetitions with 10-second direction holds, 6-second center/blink holds, and a
-final center hold. Direction order rotates between repetitions. Options include
-`--repetitions`, `--hold`, `--center`, `--blink`, `--warmup`, `--countdown`
-and `--windowed`. Longer holds may be needed for noisy recordings.
+Wait for **`Calibration saved: output\calibration.json`**. That file contains the settings the classifier needs. A report and a diagnostic image are also saved in `output`.
 
-The JSON log checkpoints every target change, including actual software onset
-times, measured durations, screen geometry, completion state and marker IDs.
-Times are measured after Tk has processed display updates; they are not
-photodiode measurements of physical display onset. Reproduce head position,
-viewing distance, electrode placement and screen geometry in subsequent use.
+If calibration fails, read the error before continuing. A failed run does not produce a new usable calibration.
 
-### Synchronization is required
-
-Use one of these explicit alignment methods:
-
-1. **Acquisition markers:** with `--lsl-markers`, the GUI publishes
-   `EOGCalibrationMarkers`. Each sample is an exact marker string such as
-   `EOG|<session_id>|<trial_id>|RIGHT`. Configure and verify the recorder so
-   these strings, including the END marker, appear as annotations in the
-   exported CNT/EDF file. Calibration requires every marker once, in order,
-   with durations agreeing within 250 ms.
-2. **Verified recording offset:** independently measure the recording time
-   of the first displayed center target and pass it as `--offset`.
-   For example, if the first target appears 12.34 seconds into the EEG,
-   supply `--offset 12.34`.
-
-**Publishing LSL markers does not automatically embed them in ANT CNT.**
-A wall-clock timestamp or an approximately simultaneous start is insufficient.
-This project does not provide an ANT hardware-trigger driver or import XDF.
-If your recorder stores markers separately, use a verified offset or export
-the exact annotations into a supported recording.
-
-The repository's existing `Team10_Session1_2026-11-07_15-31-01.cnt`
-is readable and has the required channels, but contains only 2.855 seconds.
-It cannot calibrate this protocol.
-
-## 2. Fit and validate calibration
-
-Reference is the actual acquisition reference, not a new software rereference.
-For the supplied CNT header it is CPz; check your settings for new recordings.
+## 5. See the gaze predictions
 
 ```powershell
-python calibration.py recording.cnt --session output/session.json --reference CPz --offset 12.34 --output output/calibration.json
-# With verified acquisition annotations, omit --offset:
-python calibration.py recording.cnt --session output/session_lsl.json --reference CPz --output output/calibration.json
+python real_time_classification.py playback recording.cnt --calibration output/calibration.json --reference CPz --plot
 ```
 
-Both CNT and EDF are accepted. Channel matching ignores case and surrounding
-spaces. For different labels, provide a JSON mapping:
+Use the same reference as step 4. This replays your saved recording and shows the predicted gaze direction. The participant does not need to keep wearing the cap.
 
-```json
-{"F7": "EEG F7", "F8": "EEG F8", "Fp1": "EEG Fp1", "Fp2": "EEG Fp2"}
-```
+- Initial **WARMUP** messages are normal.
+- Direction detection can take about **6 seconds** after a gaze change.
+- Predictions and a summary are saved automatically in `output`.
+- Press **Ctrl+C** to stop early.
 
-Pass its filename with `--channel-map channels.json`.
+To classify another CNT recording from the same participant and cap setup, replace `recording.cnt` in this command with that file's name. Keep the same sampling rate, acquisition settings, and reference.
 
-Calibration discards the first two seconds of each target, trims its final
-250 ms, and uses only three-second windows entirely within the remaining target.
-The initial center period is excluded from fitting. All samples in BAD spans
-are invalid; impedance/edge markers reset processing.
+## If something goes wrong
 
-All final-repetition trials are held out before fitting. Training estimates
-center offsets, directional polarity and asymmetric thresholds, plus separate
-horizontal/vertical variance limits. Directions must separate from other targets
-with at least a 1 uV training margin. Ambiguous simultaneous axis crossings are
-rejected rather than giving horizontal gaze priority.
+| Problem | What to do |
+|---|---|
+| Missing session file | Copy the JSON saved by the GUI during this exact recording. |
+| Recording too short | Export the full protocol. The existing 2.855-second example CNT is too short. |
+| Cannot align session | Check the matching session file and measured offset. |
+| Missing channels | Check the channel names. Prefixed names such as `EEG F7` need a [channel map](docs/advanced.md#2-fit-and-validate-calibration). |
+| Calibration quality failed | Check timing and signal quality; you may need a new recording. |
+| Output already exists | Use new filenames for another run; see the advanced guide for output options. |
 
-Default acceptance requires at least 80% recall for every state, including
-CENTER and BLINK, and at least 80% majority-trial accuracy on held-out data.
-A second validation runs the actual dwell classifier: directional trial recall
-must meet the same minimum, with zero incorrect/center/blink activations.
-Thresholds are engineering defaults, not established human-performance claims.
-Do not lower them simply to make a bad recording pass.
-
-A successful run writes:
-
-- `calibration.json`: versioned, validated parameters and processing settings.
-- `calibration.report.json`: parameters, per-state confusion counts,
-  held-out trials, false activations and detection latencies.
-- `calibration.features.csv`: labeled training/validation features.
-- `calibration.diagnostics.png`: centered means, variance limits and targets.
-
-When a fitted model fails validation, diagnostics/report/features are saved but
-no usable calibration is written. Earlier fitting/input failures stop with a
-specific error. Existing calibration files require `--overwrite`;
-a failed overwrite attempt preserves the previous calibration.
-
-Use `--no-plot` to skip PNG generation. Processing options include
-`--lowpass`, `--highpass`, `--warmup`, `--settle`, `--trim-end`
-and `--minimum-accuracy`. Changing preprocessing requires recalibration.
-
-## 3. Classify a recording
-
-```powershell
-python real_time_classification.py playback task_recording.cnt --calibration output/calibration.json --reference CPz --plot
-# Unpaced processing for evaluation:
-python real_time_classification.py playback task_recording.edf --calibration output/calibration.json --reference CPz --speed 0 --output output/task_predictions.csv
-```
-
-The reference and sampling rate must match calibration. Reference is an operator
-assertion; the software cannot verify the physical wiring. Acquisition hardware
-filters, reference, channel derivations and electrode positions must also remain
-consistent. Output defaults to a new timestamped CSV plus a summary JSON.
-Existing prediction CSVs are never overwritten.
-
-CSV rows contain source-relative time, quality, candidate, active state, dwell
-progress, one-time activation events, means in uV and variances in uV^2.
-The summary counts activations; those counts alone do not establish accuracy.
-
-## 4. Classify a live LSL stream
-
-ANT acquisition must already publish EEG to LSL through a compatible acquisition
-application or bridge. This code is an LSL consumer, not an amplifier driver.
-
-```powershell
-python real_time_classification.py live --stream-name "ANT EEG" --calibration output/calibration.json --reference CPz --plot
-# Alternatively choose the exact source ID; override units only after checking scaling:
-python real_time_classification.py live --source-id "your-source-id" --calibration output/calibration.json --reference CPz --units uV --duration 120
-```
-
-The selected stream must be unique, regularly sampled, and contain channel
-labels and recognized units. Units may come from each channel's LSL metadata or
-an explicit `--units V`, `mV`, or `uV` override. Incorrect units can invalidate
-all thresholds. Use `--channel-map` when the stream labels differ.
-
-Incoming timestamps are corrected to the local LSL clock without dejittering
-away acquisition gaps. Default maximum sample age is 0.5 seconds; stale samples
-are discarded, dropouts reset dwell/filter history, and ten seconds without
-fresh data exits with an error. Configure `--max-latency` and
-`--idle-timeout` for the acquisition system. Ctrl+C or closing the optional
-plot ends classification and preserves the prediction log.
-
-The adapter has mock-based tests and an optional local transport smoke test
-(`python -m tests.lsl_smoke`). Verify the actual ANT bridge, channel scaling,
-clock behavior and dropout behavior before relying on hardware operation.
-
-## Processing and dwell behavior
-
-`eog_pipeline.py` implements one stateful causal fourth-order Butterworth
-filter for all modes. By default it is low-pass only at 5 Hz: sustained gaze
-offsets are preserved, and center subtraction removes the measured baseline.
-There is no 330-second FIR applied to a short recording. Baseline drift remains
-possible; re-center/recalibrate if neutral no longer matches the recorded baseline.
-
-Two seconds are discarded after every reset, followed by a complete three-second
-feature window. Means and variances update approximately every 100 ms.
-The axes are `F8 - F7` and `(Fp1 + Fp2) / 2`, with calibration-determined
-polarity and baseline. The vertical axis retains the acquisition reference.
-
-A candidate must pass full-window stability checks, agree with the most recent
-200 ms, and remain eligible continuously for three seconds before activation.
-Hysteresis reduces threshold chatter. Neutral, blinks, ambiguity, transitions,
-invalid samples and gaps reset dwell; activation is emitted once per continuous
-hold. Full-window stability plus dwell can make latency approximately six seconds
-after a transition, rather than exactly three. Diagnostics report measured latency.
-
-The frontal EEG combination may fail to separate vertical gaze from artifacts.
-The fitter reports that failure; collecting dedicated EOG channels or changing
-the axis definition requires an explicit implementation change and recalibration.
-
-## Verification and synthetic demonstration
-
-Tests use Python's standard unittest runner; no pytest dependency is needed.
-
-```powershell
-python -B -m unittest discover -v
-# Generate explicitly synthetic fixtures, then exercise both CLIs and PNG output:
-python -m tests.synthetic --output output/demo
-python calibration.py output/demo/recording.edf --session output/demo/session.json --reference CPz --offset 0 --output output/demo/calibration.json
-python real_time_classification.py playback output/demo/recording.edf --calibration output/demo/calibration.json --reference CPz --speed 0 --output output/demo/predictions.csv
-```
-
-Tests cover causal chunk equivalence, warm-up, missing samples, alignment,
-baseline/polarity fitting, separation failures, held-out leakage, quality rejection,
-dwell timing, blink resets, ambiguous gaze, unit conversion, GUI completion/abort
-logging, saved artifacts, and the local short CNT when available.
-
-Synthetic success establishes software behavior, not performance on a person.
-Collect a new complete calibration and separate labeled task recordings to measure
-real directional accuracy, blink rejection, false activations and latency.
+For installation on another computer, live EEG, acquisition markers, tests, or technical details, see the **[advanced guide](docs/advanced.md)**.
