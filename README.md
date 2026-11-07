@@ -1,0 +1,1 @@
+# PhoniFide: Neurotech Hackathon Nov 2026
