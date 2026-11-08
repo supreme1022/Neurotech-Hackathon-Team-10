@@ -2,11 +2,18 @@
 
 **Hands-free, voice-free learning, controlled only by where you look.**
 
-PhoniFide is a two-choice learning system for people who cannot easily read, type, tap or
-speak. A prompt is spoken out loud, two answers appear far left and far right, and the
-learner answers by holding a glance on one of them. The glance is read from an EEG headset
-as eye movement (electro-oculography, EOG) on the electrodes beside the eyes, so the only
-movement the game needs is the one almost everyone keeps, including people living with ALS.
+PhoniFide is a two-choice learning and communication system controlled by eye movement alone.
+A prompt is spoken out loud, two answers appear far left and far right, and the learner
+answers by holding a glance on one of them. The glance is read from an EEG headset as eye
+movement (electro-oculography, EOG) on the electrodes beside the eyes, so it needs no hands,
+no voice, no reading and no camera. That opens it to the people most learning tools leave
+out: children learning phonics who cannot read the instructions yet; learners with dyslexia
+drilling b/d and was/saw; immigrants learning a new language one word pair at a time; people
+with speech differences or facial injuries that defeat voice interfaces; and people living
+with paralysis, ALS or locked-in syndrome, for whom the same left/right glance becomes yes/no,
+a way to pick phrases, and a way to keep learning. Every answer is logged with how long the
+learner hesitated, so a teacher, parent or therapist sees which words keep failing, and the
+same headset can add attention and jaw-clench signals that no camera can see.
 
 Built in 30 hours at the **Neurotech @ NC State BCI Hackathon** (November 7-8, 2026) for the
 **ANT Neuro track**.
