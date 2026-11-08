@@ -138,6 +138,27 @@ following the calibration dot: 10-second holds, centre / right / left / up / dow
 
 ---
 
+## Limitations
+
+- **Two choices only.** Left/right is the one reliable axis on this cap. The vertical eye
+  signal is buried in blinks and drift, so every prompt has to be framed as a two-way choice.
+- **Head still while answering.** The electrodes read where the eyes point relative to the
+  head, so turning the head while keeping the eyes on a target looks like a glance. The hold is
+  short (about 1.5 s in the game), but the head has to stay still for it.
+- **Electrode contact.** The saline sponges at F7 and F8 need a clear path to the skin. Thick
+  hair can leave them open, so impedance has to be checked before every session.
+- **Settling time and per-user calibration.** The signal drifts fastest in the first minute
+  after the cap goes on. Calibration waits for that, and every user calibrates at the start of
+  a session (about 40 s of following a dot).
+- **Latency.** The game confirms an answer after about 1.5 s of holding; the standalone
+  pipeline takes about 7 s (3 s window plus 3 s dwell). Fine for a learning game, too slow for
+  a cursor.
+- **Tested seated, on one wearer.** All measurements so far come from one person sitting
+  still. Walking, head movement and more wearers have not been tested yet, and `bridge.py` has
+  run against a simulated 24-channel LSL stream, not yet on the headset live.
+
+---
+
 ## Running it
 
 ```powershell
