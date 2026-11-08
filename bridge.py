@@ -1,5 +1,11 @@
 """EEG -> browser bridge for index-2.html (the adaptive reading-lesson prototype).
 
+WHAT THIS IS (for the team): bridge.py is a small Python program that reads the live EEG
+stream from the headset and sends Miguel's web page the three things it was already built
+to listen for (an engagement score, jaw-clench events, and left/right glances) over a local
+WebSocket, so his reading lesson runs off real brain signal instead of its built-in
+simulation mode.
+
 The web page opens ws://localhost:8765 and expects, several times a second:
 
     {"engagement": 0.0-1.0, "clench": true|false,
