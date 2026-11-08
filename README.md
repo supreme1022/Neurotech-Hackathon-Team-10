@@ -18,16 +18,15 @@ same headset can add attention and jaw-clench signals that no camera can see.
 Built in 30 hours at the **Neurotech @ NC State BCI Hackathon** (November 7-8, 2026) for the
 **ANT Neuro track**.
 
-**Reading guide.** The sections follow the ANT track rubric:
 
-| Rubric row | Section |
+| Sections |
 |---|---|
-| Creativity | [The idea](#the-idea) and [What is new here](#what-is-new-here) |
-| Practicality | [Who it is for, and how it gets into the world](#who-it-is-for-and-how-it-gets-into-the-world) |
-| Technical difficulty | [The hard parts](#the-hard-parts) |
-| Execution | [Evidence](#evidence), [Limitations](#limitations), [Running it](#running-it) |
-| Movement integration | [Movement: eyes still versus eyes moving](#movement-eyes-still-versus-eyes-moving) |
-| Inclusivity | [Accommodations](#accommodations) |
+| [The idea](#the-idea) and [What is new here](#what-is-new-here) |
+| [Who it is for, and how it gets into the world](#who-it-is-for-and-how-it-gets-into-the-world) |
+| [The hard parts](#the-hard-parts) |
+| [Evidence](#evidence), [Limitations](#limitations), [Running it](#running-it) |
+| [Movement: eyes still versus eyes moving](#movement-eyes-still-versus-eyes-moving) |
+| [Accommodations](#accommodations) |
 
 ---
 
