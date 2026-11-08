@@ -69,7 +69,7 @@ signal-processing branch  EEG/EOG calibration and real-time classification pipel
 
 ### `signal-processing` branch: the EOG pipeline
 
-Sajan's standalone pipeline for turning the raw EEG recording into gaze commands, with
+A standalone pipeline for turning the raw EEG recording into gaze commands, with
 unit tests (`python -m unittest discover -s tests -t .`):
 
 - `calibration_GUI.py`: on-screen dot protocol (centre, right, left, up, down, blink), optional LSL markers.
@@ -118,7 +118,7 @@ after 20 s of low engagement, and a clench selected the highlighted answer.
 
 ## What we measured
 
-Our calibration recording (Saturday 5:54 pm, 4.1 minutes, 500 Hz, Sajan wearing the cap,
+Our calibration recording (Saturday 5:54 pm, 4.1 minutes, 500 Hz, one team member wearing the cap,
 following the calibration dot: 10-second holds, centre / right / left / up / down / blink,
 3 repetitions):
 
