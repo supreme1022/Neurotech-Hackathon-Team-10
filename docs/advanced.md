@@ -289,3 +289,58 @@ This recovery mode was developed while inspecting the supplied recording. Its
 within-recording results are exploratory, not blind independent validation.
 Review all reported errors before interpreting the results. These calibrations
 are blocked from live LSL mode because preprocessing uses future samples.
+
+## Console direction playback
+
+`playback_directions.py` provides terminal-only output, without opening a plot or
+writing prediction files. Defaults are `recording.cnt`,
+`output/recovered/calibration.json`, reference CPz, and normal playback speed.
+
+```powershell
+conda run --no-capture-output -n neurotech-hackathon python playback_directions.py
+```
+
+Two modes are available:
+
+- `--mode commands` (default): print one lowercase direction on each confirmed
+  dwell activation. It preserves the saved classifier's dwell and artifact rules.
+- `--mode labels`: print eligible ongoing direction predictions at changes and
+  about once per source-time second while unchanged. Set `--interval 0.5` for a
+  different interval. These labels do not require completed dwell and are less
+  reliable than commands for the recovered model.
+
+Both modes remain silent for neutral, blink, warm-up, invalid, or uncertain
+sections. They do not force every EEG sample into one of four directions.
+Known false and duplicate detections in the saved classifier remain possible.
+No GUI target/session log is read to generate these predictions.
+
+Use `--timestamps` for source-time text, `--speed 2` for double-speed playback,
+or `--speed 0` for a quick unpaced check. Different inputs can be selected:
+
+```powershell
+conda run --no-capture-output -n neurotech-hackathon python playback_directions.py task.cnt --calibration output/calibration.json --reference CPz --timestamps
+```
+
+The entire recording is preprocessed before starting the playback clock. Events
+then follow absolute recording-time deadlines, including silent periods and the
+end of the recording. This prevents preprocessing time from making the beginning
+play back too quickly. The recovered profile still uses future samples and does
+not become live EEG inference by pacing its printed results.
+
+### Future frontend connection
+
+`--json` emits one JSON object per line on stdout:
+
+```json
+{"type":"direction","sequence":1,"time_sec":21.998,"direction":"right","mode":"commands"}
+```
+
+Progress and errors go to stderr, keeping stdout suitable for a backend process
+to consume. Every line is flushed immediately. `sequence` counts events within
+one replay; `time_sec` is time in the recording, not a wall-clock timestamp.
+
+The Python function `replay_directions(events, duration_sec, on_direction)` accepts
+a callback receiving each `DirectionEvent`. Its `as_dict()` method provides the
+same JSON payload, so a future backend can forward events to React without
+changing EEG classification. No frontend, server, or network transport is started
+by this script.

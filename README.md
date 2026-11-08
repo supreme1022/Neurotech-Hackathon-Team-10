@@ -87,6 +87,25 @@ Use the same reference as step 4. This replays your saved recording and shows th
 
 To classify another CNT recording from the same participant and cap setup, replace `recording.cnt` in this command with that file's name. Keep the same sampling rate, acquisition settings, and reference.
 
+## Print directions without plots
+
+If you already have `output/recovered/calibration.json`, run:
+
+```powershell
+conda run --no-capture-output -n neurotech-hackathon python playback_directions.py
+```
+
+This plays `recording.cnt` at normal speed and prints only `left`, `right`, `up`,
+or `down` when a held-gaze command is confirmed. Neutral and uncertain periods
+stay silent. Press **Ctrl+C** to stop.
+
+- Add `--mode labels` for ongoing direction predictions about once per second.
+- Add `--timestamps` to show the recording time beside each direction.
+- Add `--json` for structured events that a future frontend backend can consume.
+
+It uses the saved experimental classifier, so its known errors still apply.
+See [console playback details](docs/advanced.md#console-direction-playback).
+
 ## For a drifting recording
 
 There is an **experimental recorded-command mode** for data with baseline drift and blinks. If the first dot appeared between 4 and 5 seconds into your recording, run:
