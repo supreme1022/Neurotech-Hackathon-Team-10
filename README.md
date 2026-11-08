@@ -102,7 +102,8 @@ holds, 3 repetitions).
 - **Still versus moving test:** calibrating on repetitions 1-2 and testing on the held-out
   repetition 3, every still (centre) window was classified as still (143 of 143) and every
   glance window as its direction (47 of 47 right, 47 of 47 left), with **0 false activations**.
-  Replaying the whole recording gave 4 of 4 glances and 0 false activations.
+  Replaying repetitions 2 and 3 gave 4 of 4 glances and 0 false activations; the settling
+  first repetition is reported under *Where the numbers come from*.
 - **Artifact checks:**
   - *Blinks*, the largest artifact on a frontal EEG: rejected by a 3-second median window and
     a variance gate in the causal detector; masked as pulses before baseline estimation in the
@@ -186,6 +187,8 @@ README.md                 this file
 index-2.html              adaptive reading-lesson web prototype
 bridge.py                 EEG -> browser bridge: live engagement, jaw-clench and gaze events for index-2.html
 signal-processing branch  EOG calibration + classification pipeline, tests, docs and the recordings
+drift-tracking branch     the same pipeline + causal drift-tracking baseline, estimate_offset.py, 28 tests,
+                          and results/sesh2/ (the saved runs behind the numbers in this README)
 ```
 
 ```
@@ -218,6 +221,17 @@ A standalone pipeline that turns the raw EEG recording into gaze commands:
 - `lsl_input.py`, `calibration_session.py`, `docs/advanced.md`, and `tests/` (44 unit tests).
 - The recordings: `recording.cnt` (the 4.1-minute calibration session used throughout this
   README) and the shorter first session.
+
+### `drift-tracking` branch: the variant behind the numbers
+
+The pipeline as of its 9f8e111 commit plus the causal additions used for the results in this
+README: a baseline that follows the signal only while the gaze is at centre
+(`--baseline-track`, with `--baseline-rescue` for runaway holds), horizontal-only calibration
+(`--directions RIGHT,LEFT`), skipping the settling repetition (`--skip-repeats 1`), and
+`estimate_offset.py`, which recovers the dot-schedule timing from the EEG when no log exists.
+It carries `recording.cnt`, 28 unit tests (`tests/test_drift.py` covers the additions) and
+`results/sesh2/` with the calibration JSON and report, diagnostic plots, playback log and
+prediction summary those commands produced. Its README gives the exact three commands.
 
 ### `index-2.html`: adaptive reading lesson (web)
 
@@ -298,7 +312,8 @@ cap, following the calibration dot: 10-second holds, centre / right / left / up 
 - With those fixes, calibration on repetitions 1-2 and testing on the held-out repetition 3:
   **100% window recall for centre, right and left (143 / 47 / 47 windows); 2 of 2 glances
   detected; 0 false activations; about 7 s latency** (3 s window + 3 s dwell). Replaying the
-  whole recording: repetitions 2 and 3 gave 4 of 4 glances with 0 false activations.
+  whole recording: repetitions 2 and 3 gave 4 of 4 glances with 0 false activations; the
+  settling first repetition is reported under *Where the numbers come from*.
   Thresholds came out near +136 uV (right) and -145 uV (left).
 
 From the saved calibration report:
@@ -317,6 +332,8 @@ From the saved calibration report:
 
 - `signal-processing` branch: **44 unit tests** (synthetic fixtures, offline recovery mode,
   playback), run with `python -m unittest discover -s tests -t .`.
+- `drift-tracking` branch: **28 unit tests**, including `tests/test_drift.py` for the baseline
+  tracker, the rescue, the direction subset and repetition skipping.
 - `bridge.py`: exercised with its synthetic `--demo` signal, with a simulated 24-channel LSL
   headset, and against the real page in a browser: the engagement meter followed the signal,
   the attention-drop adaptation fired after 20 s of low engagement, and a clench selected the
@@ -325,12 +342,21 @@ From the saved calibration report:
 
 ### Where the numbers come from
 
-The gaze numbers above were produced with the causal, drift-tracking variant of the
-calibration and playback code (the same baseline logic `bridge.py` uses) run on
-`recording.cnt`. The `signal-processing` branch ships the offline recovery mode for the same
-recording; its report lists recalls, false activations and timing sensitivity rather than
-hiding them, and its own documentation says its within-recording results are exploratory
-rather than blind validation. We agree, and the test plan above is how that gets fixed.
+The gaze numbers above were produced on the `drift-tracking` branch: `estimate_offset.py`,
+then `calibration.py` with `--baseline-track 2 --baseline-rescue 15 --skip-repeats 1
+--directions RIGHT,LEFT`, then `real_time_classification.py playback`, all on `recording.cnt`.
+The saved outputs are on that branch under `results/sesh2/`, so the figures can be checked
+without re-running anything.
+
+The full replay is reported in full: 7 activations for 6 glances. Repetitions 2 and 3 gave
+4 of 4 glances with 0 false activations. Repetition 1, recorded during the first settling
+minute, missed its right glance and produced 2 false left calls, which is why the one-minute
+wait after the cap goes on is part of the protocol.
+
+The `signal-processing` branch ships a separate offline recovery mode for the same recording;
+its report lists recalls, false activations and timing sensitivity rather than hiding them,
+and its own documentation says its within-recording results are exploratory rather than
+blind validation. We agree, and the test plan above is how that gets fixed.
 
 ---
 
