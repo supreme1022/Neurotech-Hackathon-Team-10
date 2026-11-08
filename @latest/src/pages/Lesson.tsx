@@ -1,25 +1,51 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { Logo } from '../components/ui/Logo'
 import { Sparkles } from '../components/ui/Sparkles'
+import timingsCsv from '../../../timings.csv?raw'
+import { getPlayback, parseTimings } from '../lessonTimeline'
+
+const intervals = parseTimings(timingsCsv)
+const playbackDuration = intervals[intervals.length - 1].end
 
 type Choice = {
   id: string
   label: string
   correct: boolean
-  illustration: 'ball' | 'cat'
+  illustration: 'ball' | 'cat' | 'dog' | 'sun' | 'fish'
 }
 
-const question = {
+const questions = [{
   prompt: 'Which word starts with',
   sound: '/b/',
   choices: [
     { id: 'ball', label: 'ball', correct: true, illustration: 'ball' },
     { id: 'cat', label: 'cat', correct: false, illustration: 'cat' },
   ] as Choice[],
-}
+}, ...[
+  { sound: '/k/', answer: 'cat', other: 'ball' },
+  { sound: '/d/', answer: 'dog', other: 'sun' },
+  { sound: '/s/', answer: 'sun', other: 'fish' },
+  { sound: '/f/', answer: 'fish', other: 'dog' },
+].map(({ sound, answer, other }, index) => ({
+  prompt: 'Which word starts with',
+  sound,
+  choices: (index % 2 === 0 ? [other, answer] : [answer, other]).map((word) => ({
+    id: word,
+    label: word,
+    correct: word === answer,
+    illustration: word as Choice['illustration'],
+  })),
+}))]
 
 function ChoiceArt({ type }: { type: Choice['illustration'] }) {
+  if (type === 'dog' || type === 'sun' || type === 'fish') {
+    return (
+      <span className="flex h-[88px] w-[88px] items-center justify-center text-6xl" aria-hidden="true">
+        {{ dog: '🐶', sun: '☀️', fish: '🐟' }[type]}
+      </span>
+    )
+  }
   if (type === 'ball') {
     return (
       <svg width="88" height="88" viewBox="0 0 72 72" aria-hidden="true">
@@ -47,12 +73,32 @@ function ChoiceArt({ type }: { type: Choice['illustration'] }) {
 }
 
 export function Lesson() {
-  const [selected, setSelected] = useState<string | null>(null)
-  const [feedback, setFeedback] = useState<'correct' | 'incorrect' | null>(null)
+  const [run, setRun] = useState(0)
+  const [elapsed, setElapsed] = useState(0)
+  const { questionIndex, complete, active, finished } = getPlayback(
+    intervals, elapsed, questions.map((question) => question.choices[0].correct ? 'LEFT' : 'RIGHT'),
+  )
+  const question = questions[Math.min(questionIndex, questions.length - 1)]
+  const selected = run === 0 || active?.direction === 'CENTER' || !active
+    ? null : question.choices[active.direction === 'LEFT' ? 0 : 1]
+  const feedback = selected ? (selected.correct ? 'correct' : 'incorrect') : null
 
-  function choose(choice: Choice) {
-    setSelected(choice.id)
-    setFeedback(choice.correct ? 'correct' : 'incorrect')
+  useEffect(() => {
+    if (run === 0) return
+    const start = performance.now()
+    let frame: number
+    function tick() {
+      const seconds = Math.min((performance.now() - start) / 1000, playbackDuration)
+      setElapsed(seconds)
+      if (seconds < playbackDuration) frame = window.requestAnimationFrame(tick)
+    }
+    frame = window.requestAnimationFrame(tick)
+    return () => window.cancelAnimationFrame(frame)
+  }, [run])
+
+  function startDemo() {
+    setElapsed(0)
+    setRun((value) => value + 1)
   }
 
   return (
@@ -69,9 +115,32 @@ export function Lesson() {
           <div className="mb-6 flex items-center gap-2 text-sm font-bold text-slate-text">
             <span>Phonics: Letter Sounds</span>
             <span className="text-slate-300">•</span>
-            <span>3 of 10</span>
+            <span>{complete ? questions.length : questionIndex + 1} of {questions.length}</span>
           </div>
 
+          <div className="mb-6 flex flex-col items-center gap-3">
+            <p className="text-sm font-semibold text-slate-text" role="status">
+              {run === 0 ? 'Start the demo when your recording reaches 8 seconds.'
+                : finished ? 'Demo finished.' : `Demo playing · ${elapsed.toFixed(1)} / ${playbackDuration} seconds`}
+            </p>
+            <button type="button" onClick={startDemo} className="rounded-full bg-teal px-6 py-3 font-bold text-white">
+              {run === 0 ? 'Start demo' : 'Restart demo'}
+            </button>
+          </div>
+
+          {complete ? (
+            <div className="w-full max-w-2xl rounded-[1.75rem] bg-white p-8 text-center shadow-lg" role="status">
+              <h1 className="text-3xl font-extrabold text-navy">Lesson complete!</h1>
+              <p className="mt-4 text-slate-text">Nice work! You answered all {questions.length} questions.</p>
+              <button
+                type="button"
+                className="mt-6 rounded-full bg-teal px-6 py-3 font-bold text-white"
+                onClick={startDemo}
+              >
+                Practice again
+              </button>
+            </div>
+          ) : (
           <div className="w-full max-w-2xl rounded-[1.75rem] border border-slate-100 bg-white p-6 shadow-[0_20px_50px_rgba(15,31,58,0.1)] sm:p-8">
             <div className="mb-8 flex items-center justify-center gap-3">
               <div className="flex h-12 w-12 items-center justify-center rounded-full bg-teal text-white">
@@ -89,26 +158,27 @@ export function Lesson() {
               </h1>
             </div>
 
-            <div className="grid gap-4 sm:grid-cols-2">
-              {question.choices.map((choice) => {
-                const isSelected = selected === choice.id
+            <div className="grid grid-cols-2 gap-4">
+              {question.choices.map((choice, index) => {
+                const isSelected = selected?.id === choice.id
                 return (
                   <button
                     key={choice.id}
                     type="button"
-                    onClick={() => choose(choice)}
-                    className={`flex flex-col items-center rounded-2xl border-[2.5px] p-6 transition-all ${
+                    disabled
+                    aria-pressed={isSelected}
+                    className={`flex flex-col items-center rounded-2xl border-[2.5px] p-3 sm:p-6 ${
                       isSelected
                         ? choice.correct
                           ? 'border-teal bg-teal-light/50'
                           : 'border-red-400 bg-red-50'
-                        : 'border-slate-200 bg-white hover:border-teal/50'
+                        : 'border-slate-200 bg-white'
                     }`}
                   >
                     <ChoiceArt type={choice.illustration} />
                     <span className="mt-3 text-xl font-extrabold text-navy">{choice.label}</span>
                     <span className="mt-2 text-xs font-bold text-slate-text">
-                      Look {choice.id === 'ball' ? 'left' : 'right'} to select
+                      Look {index === 0 ? 'left' : 'right'} to select
                     </span>
                   </button>
                 )
@@ -117,20 +187,23 @@ export function Lesson() {
 
             {feedback ? (
               <p
+                role="status"
                 className={`mt-6 text-center text-base font-extrabold ${
                   feedback === 'correct' ? 'text-teal' : 'text-red-500'
                 }`}
               >
                 {feedback === 'correct'
-                  ? 'Nice work! Ball starts with /b/.'
-                  : 'Not quite — try looking at the other choice.'}
+                  ? `Nice work! ${selected?.label} starts with ${question.sound}. Continuing when this hold ends.`
+                  : 'Not quite — this question will stay until a correct hold finishes.'}
               </p>
             ) : (
               <p className="mt-6 text-center text-sm font-semibold text-slate-text">
-                Use eye movement to choose: look left or right, then hold steady.
+                {finished ? 'Playback has stopped. Restart the demo to replay the timings.'
+                  : 'Look left or right to select. Centered gaze leaves both options clear.'}
               </p>
             )}
           </div>
+          )}
         </div>
       </div>
     </main>
