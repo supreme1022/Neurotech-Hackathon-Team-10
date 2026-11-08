@@ -1,4 +1,4 @@
-﻿# PhoniFide: How to run the EEG pipeline
+# PhoniFide: How to run the EEG pipeline
 
 **Record the eyes following the dot → create a calibration file → replay the EEG to see predicted gaze directions.**
 
@@ -86,6 +86,18 @@ Use the same reference as step 4. This replays your saved recording and shows th
 - Press **Ctrl+C** to stop early.
 
 To classify another CNT recording from the same participant and cap setup, replace `recording.cnt` in this command with that file's name. Keep the same sampling rate, acquisition settings, and reference.
+
+## For a drifting recording
+
+There is an **experimental recorded-command mode** for data with baseline drift and blinks. If the first dot appeared between 4 and 5 seconds into your recording, run:
+
+```powershell
+conda run --no-capture-output -n neurotech-hackathon python calibration.py recording.cnt --session output/session.json --reference CPz --offset-range 4 5 --offline-drift --command-calibration --output output/recovered/calibration.json
+```
+
+Use your actual session filename and timing bounds. Then replay using `--calibration output/recovered/calibration.json` in step 5. Add `--overwrite` to the calibration command only when intentionally replacing an earlier result.
+
+This mode evaluates held-gaze **commands**, not reliable direction labels at every moment. It reports weaker results and false activations instead of hiding them. Brief detected artifacts pause the three seconds of usable dwell evidence. It processes saved files and **cannot be used for live LSL**. See [details](docs/advanced.md#recorded-command-recovery).
 
 ## If something goes wrong
 

@@ -220,3 +220,72 @@ logging, saved artifacts, and the local short CNT when available.
 Synthetic success establishes software behavior, not performance on a person.
 Collect a new complete calibration and separate labeled task recordings to measure
 real directional accuracy, blink rejection, false activations and latency.
+
+## Recorded-command recovery
+
+The default pipeline above retains strict per-state window validation. An opt-in
+recorded-file profile is available for drifting CNT/EDF data with blink artifacts:
+
+```powershell
+conda run --no-capture-output -n neurotech-hackathon python calibration.py recording.cnt --session output/session.json --reference CPz --offset-range 4 5 --offline-drift --command-calibration --output output/recovered/calibration.json
+conda run --no-capture-output -n neurotech-hackathon python real_time_classification.py playback recording.cnt --calibration output/recovered/calibration.json --reference CPz --plot
+```
+
+Use the actual session filename and timing bounds. `--offset-range 4 5` uses 4.5 s
+as a bounded estimate, increases the end trim to account for uncertainty, and
+checks the same fitted model at both endpoints. It does not recover an exact
+stimulus timestamp. Timing bounds must be at most one second wide. If the first
+target's time was measured, use `--offset` instead.
+
+`--offline-drift` enables these saved processing settings:
+
+- Remove brief blink pulses before estimating the slow baseline. The detector's
+  amplitude threshold is learned from stable and BLINK samples in training only.
+  Pulse detection uses a local median residual with high/low threshold hysteresis.
+- Subtract a 10-second Gaussian baseline estimate within each valid data span.
+  Baseline estimation uses surrounding unlabeled samples and is noncausal.
+- Use `F8 - F7` horizontally and `(Fp1 + Fp2 - F7 - F8) / 2` vertically to cancel
+  a reference component common to the frontal and lateral pairs.
+- Use one-second median locations and squared scaled MADs, updated every 100 ms.
+  These resist short outliers; the default mode still uses three-second means
+  and ordinary variances. Legacy CSV fields named `*_mean_uv` and
+  `*_variance_uv2` contain the robust statistics in this profile; the calibration
+  and prediction summary identify the statistic explicitly.
+- Fit horizontal thresholds against all stable targets. Fit vertical thresholds
+  against center and the other vertical direction, because horizontal targets
+  can also shift the vertical signal. Horizontal gating is enabled explicitly.
+  Stability checks use the candidate's axis rather than letting fluctuations in
+  the other axis reject it. Threshold selection maximizes the worst class recall
+  on training data; overlapping quantiles need not imply unusable classification.
+- Require three seconds of usable directional evidence. Brief detected blinks
+  and unstable artifacts pause this clock for at most one second each. No command
+  is emitted during an artifact. Longer artifacts, a changed candidate, neutral
+  gaze, and acquisition gaps reset dwell. This is blink-tolerant evidence
+  accumulation, not a guarantee of three uninterrupted seconds of observed gaze.
+
+Calibration still fits only the first repetitions. For offline smoothing,
+training features are recomputed on a recording cropped before the final
+repetition, so held-out samples cannot alter the fitted parameters. The final
+repetition is evaluated using the same label-free recorded-file preprocessing
+as playback. A complete usable feature window is required in every target trial.
+
+Without `--command-calibration`, the original strict per-state recall checks
+remain mandatory. `--command-calibration` explicitly selects a different task:
+held-gaze command detection. It requires the configured minimum for directional
+command recall, majority-trial accuracy, center recall, and BLINK-window coverage,
+with zero false activations in the final repetition. These checks must also pass
+at both timing bounds when a range is supplied. It does not require every
+direction's continuous-window recall to reach that minimum.
+
+The report preserves `window_checks_passed`, all per-state recalls, excluded
+blink-window counts, eligible fractions, timing sensitivity, command detection
+times, and false activations. BLINK trials are intermittent: coverage measures
+whether a full feature window contains a detected blink. Gaze recalls exclude
+currently masked blink windows; they are not whole-recording accuracy figures.
+A separate full-recording audit includes the training repetitions and reports
+false and duplicate activations, even if final-repetition acceptance passes.
+
+This recovery mode was developed while inspecting the supplied recording. Its
+within-recording results are exploratory, not blind independent validation.
+Review all reported errors before interpreting the results. These calibrations
+are blocked from live LSL mode because preprocessing uses future samples.

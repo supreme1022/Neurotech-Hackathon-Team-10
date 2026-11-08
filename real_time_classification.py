@@ -19,6 +19,7 @@ from eog_pipeline import (
 RESULT_FIELDS = (
     "time_sec", "quality", "candidate", "state", "dwell_sec", "activated",
     "h_mean_uv", "v_mean_uv", "h_variance_uv2", "v_variance_uv2",
+    "blink_recent", "blink_fraction",
 )
 
 
@@ -46,7 +47,8 @@ class ResultSink:
             self.history = deque(maxlen=100)
             self.lines = [ax.plot([], [])[0] for ax in self.axes]
             for i, ax in enumerate(self.axes):
-                ax.set_ylabel(("Horizontal" if i == 0 else "Vertical") + " mean (uV)")
+                statistic = " median" if model["processing"].get("robust_features") else " mean"
+                ax.set_ylabel(("Horizontal" if i == 0 else "Vertical") + statistic + " (uV)")
                 for rule in model["directions"].values():
                     if rule["axis"] == i:
                         ax.axhline(model["baseline_uv"][i] +
@@ -99,6 +101,9 @@ class ResultSink:
             "status": status, "rows": self.rows, "state_counts": dict(self.counts),
             "activation_counts": dict(self.activations), "source": self.source,
             "calibration_created_utc": self.model.get("created_utc"),
+            "operating_mode": self.model.get("operating_mode", "causal_streaming"),
+            "feature_statistic": self.model.get("feature_statistic", "mean_and_variance"),
+            "acceptance_policy": self.model["quality"].get("acceptance_policy", "all_states"),
             "note": "Activation counts are detections, not accuracy measurements.",
         })
 
@@ -204,6 +209,12 @@ def main(argv=None):
     status = "failed"
     try:
         model = calibration_model(read_json(args.calibration))
+        if model["quality"].get("acceptance_policy") == "command_trials":
+            print("Recorded command calibration: inspect activation events. Continuous gaze "
+                  "labels may be less reliable; see calibration report.")
+        if args.mode == "live" and model["processing"].get("offline_detrend_sec", 0):
+            raise ValueError("This calibration uses offline drift correction. Use playback "
+                             "with a recorded CNT/EDF file; live LSL requires a causal calibration.")
         mapping = read_json(args.channel_map) if args.channel_map else model.get("channel_map")
         if args.mode == "playback":
             recording = load_recording(args.recording, mapping)
