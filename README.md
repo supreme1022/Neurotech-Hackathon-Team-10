@@ -19,14 +19,14 @@ Built in 30 hours at the **Neurotech @ NC State BCI Hackathon** (November 7-8, 2
 **ANT Neuro track**.
 
 
-| Sections |
-|---|---|
-| [The idea](#the-idea) and [What is new here](#what-is-new-here) |
-| [Who it is for, and how it gets into the world](#who-it-is-for-and-how-it-gets-into-the-world) |
-| [The hard parts](#the-hard-parts) |
-| [Evidence](#evidence), [Limitations](#limitations), [Running it](#running-it) |
-| [Movement: eyes still versus eyes moving](#movement-eyes-still-versus-eyes-moving) |
-| [Accommodations](#accommodations) |
+**Sections**
+
+- [The idea](#the-idea) and [What is new here](#what-is-new-here)
+- [Who it is for, and how it gets into the world](#who-it-is-for-and-how-it-gets-into-the-world)
+- [The hard parts](#the-hard-parts)
+- [Evidence](#evidence), [Limitations](#limitations), [Running it](#running-it)
+- [Movement: eyes still versus eyes moving](#movement-eyes-still-versus-eyes-moving)
+- [Accommodations](#accommodations)
 
 ---
 
