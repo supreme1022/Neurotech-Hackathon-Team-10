@@ -62,9 +62,9 @@ focus and alertness signals that a webcam cannot see.
 
 ```
 README.md                 this file
-index-2.html              Adaptive reading-lesson web prototype (Miguel)
-bridge.py                 EEG -> browser bridge: live engagement, jaw-clench and gaze events for index-2.html (Matthew)
-signal-processing branch  EEG/EOG calibration and real-time classification pipeline + tests (Sajan, Matthew)
+index-2.html              Adaptive reading-lesson web prototype
+bridge.py                 EEG -> browser bridge: live engagement, jaw-clench and gaze events for index-2.html
+signal-processing branch  EEG/EOG calibration and real-time classification pipeline + tests
 ```
 
 ### `signal-processing` branch: the EOG pipeline
@@ -163,6 +163,6 @@ The calibration and classification pipeline has its own instructions on the
 |---|---|
 | Supreme Constantine | NC State, Computer Science |
 | Shradha Bhatia | NC State, Electrical and Computer Engineering |
-| Matthew Sanchez | Wake Tech, Science. EEG integration, drift fixes, EEG-to-browser bridge |
-| Sajan Patel | Duke, Biomedical Engineering. EOG calibration and classification pipeline, recordings |
-| Miguel Gaido | Durham Tech, Computer Science. Adaptive reading-lesson web prototype |
+| Matthew Sanchez | Wake Tech, Science |
+| Sajan Patel | Duke, Biomedical Engineering |
+| Miguel Gaido | Durham Tech, Computer Science |
