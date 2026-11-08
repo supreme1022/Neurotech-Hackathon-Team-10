@@ -1,0 +1,35 @@
+{
+  "status": "complete",
+  "rows": 2482,
+  "state_counts": {
+    "WARMUP": 49,
+    "TRANSITION_BLINK": 495,
+    "CENTER": 1398,
+    "DWELLING": 230,
+    "LEFT": 225,
+    "RECENTERED": 1,
+    "RIGHT": 84
+  },
+  "activation_counts": {
+    "LEFT": 5,
+    "RIGHT": 2
+  },
+  "source": {
+    "mode": "playback",
+    "path": "C:\\Users\\15715\\Projects\\bci-hackathon\\data\\session2\\sesh2_team10_2026-11-07_17-54-41.cnt",
+    "format": "cnt",
+    "channels": {
+      "F7": "F7",
+      "F8": "F8",
+      "Fp1": "Fp1",
+      "Fp2": "Fp2"
+    },
+    "sfreq_hz": 500.0,
+    "samples": 124134,
+    "source_highpass_hz": 0.0,
+    "source_lowpass_hz": 250.0,
+    "reference": "CPz"
+  },
+  "calibration_created_utc": "2026-11-07T23:44:58.703996+00:00",
+  "note": "Activation counts are detections, not accuracy measurements."
+}

@@ -1,0 +1,309 @@
+{
+  "schema_version": 1,
+  "session_id": "reconstructed-sesh2_team10_2026-11-07_",
+  "status": "complete",
+  "events": [
+    {
+      "trial_id": "0",
+      "label": "CENTER",
+      "repeat": -1,
+      "onset_sec": 0.0,
+      "duration_sec": 8,
+      "marker": "EOG|reconstructed-sesh2_team10_2026-11-07_|0|CENTER",
+      "lsl_timestamp": null
+    },
+    {
+      "trial_id": "1",
+      "label": "CENTER",
+      "repeat": 0,
+      "onset_sec": 8.0,
+      "duration_sec": 6,
+      "marker": "EOG|reconstructed-sesh2_team10_2026-11-07_|1|CENTER",
+      "lsl_timestamp": null
+    },
+    {
+      "trial_id": "2",
+      "label": "RIGHT",
+      "repeat": 0,
+      "onset_sec": 14.0,
+      "duration_sec": 10.0,
+      "marker": "EOG|reconstructed-sesh2_team10_2026-11-07_|2|RIGHT",
+      "lsl_timestamp": null
+    },
+    {
+      "trial_id": "3",
+      "label": "CENTER",
+      "repeat": 0,
+      "onset_sec": 24.0,
+      "duration_sec": 6,
+      "marker": "EOG|reconstructed-sesh2_team10_2026-11-07_|3|CENTER",
+      "lsl_timestamp": null
+    },
+    {
+      "trial_id": "4",
+      "label": "LEFT",
+      "repeat": 0,
+      "onset_sec": 30.0,
+      "duration_sec": 10.0,
+      "marker": "EOG|reconstructed-sesh2_team10_2026-11-07_|4|LEFT",
+      "lsl_timestamp": null
+    },
+    {
+      "trial_id": "5",
+      "label": "CENTER",
+      "repeat": 0,
+      "onset_sec": 40.0,
+      "duration_sec": 6,
+      "marker": "EOG|reconstructed-sesh2_team10_2026-11-07_|5|CENTER",
+      "lsl_timestamp": null
+    },
+    {
+      "trial_id": "6",
+      "label": "UP",
+      "repeat": 0,
+      "onset_sec": 46.0,
+      "duration_sec": 10.0,
+      "marker": "EOG|reconstructed-sesh2_team10_2026-11-07_|6|UP",
+      "lsl_timestamp": null
+    },
+    {
+      "trial_id": "7",
+      "label": "CENTER",
+      "repeat": 0,
+      "onset_sec": 56.0,
+      "duration_sec": 6,
+      "marker": "EOG|reconstructed-sesh2_team10_2026-11-07_|7|CENTER",
+      "lsl_timestamp": null
+    },
+    {
+      "trial_id": "8",
+      "label": "DOWN",
+      "repeat": 0,
+      "onset_sec": 62.0,
+      "duration_sec": 10.0,
+      "marker": "EOG|reconstructed-sesh2_team10_2026-11-07_|8|DOWN",
+      "lsl_timestamp": null
+    },
+    {
+      "trial_id": "9",
+      "label": "CENTER",
+      "repeat": 0,
+      "onset_sec": 72.0,
+      "duration_sec": 6,
+      "marker": "EOG|reconstructed-sesh2_team10_2026-11-07_|9|CENTER",
+      "lsl_timestamp": null
+    },
+    {
+      "trial_id": "10",
+      "label": "BLINK",
+      "repeat": 0,
+      "onset_sec": 78.0,
+      "duration_sec": 6,
+      "marker": "EOG|reconstructed-sesh2_team10_2026-11-07_|10|BLINK",
+      "lsl_timestamp": null
+    },
+    {
+      "trial_id": "11",
+      "label": "CENTER",
+      "repeat": 1,
+      "onset_sec": 84.0,
+      "duration_sec": 6,
+      "marker": "EOG|reconstructed-sesh2_team10_2026-11-07_|11|CENTER",
+      "lsl_timestamp": null
+    },
+    {
+      "trial_id": "12",
+      "label": "LEFT",
+      "repeat": 1,
+      "onset_sec": 90.0,
+      "duration_sec": 10.0,
+      "marker": "EOG|reconstructed-sesh2_team10_2026-11-07_|12|LEFT",
+      "lsl_timestamp": null
+    },
+    {
+      "trial_id": "13",
+      "label": "CENTER",
+      "repeat": 1,
+      "onset_sec": 100.0,
+      "duration_sec": 6,
+      "marker": "EOG|reconstructed-sesh2_team10_2026-11-07_|13|CENTER",
+      "lsl_timestamp": null
+    },
+    {
+      "trial_id": "14",
+      "label": "UP",
+      "repeat": 1,
+      "onset_sec": 106.0,
+      "duration_sec": 10.0,
+      "marker": "EOG|reconstructed-sesh2_team10_2026-11-07_|14|UP",
+      "lsl_timestamp": null
+    },
+    {
+      "trial_id": "15",
+      "label": "CENTER",
+      "repeat": 1,
+      "onset_sec": 116.0,
+      "duration_sec": 6,
+      "marker": "EOG|reconstructed-sesh2_team10_2026-11-07_|15|CENTER",
+      "lsl_timestamp": null
+    },
+    {
+      "trial_id": "16",
+      "label": "DOWN",
+      "repeat": 1,
+      "onset_sec": 122.0,
+      "duration_sec": 10.0,
+      "marker": "EOG|reconstructed-sesh2_team10_2026-11-07_|16|DOWN",
+      "lsl_timestamp": null
+    },
+    {
+      "trial_id": "17",
+      "label": "CENTER",
+      "repeat": 1,
+      "onset_sec": 132.0,
+      "duration_sec": 6,
+      "marker": "EOG|reconstructed-sesh2_team10_2026-11-07_|17|CENTER",
+      "lsl_timestamp": null
+    },
+    {
+      "trial_id": "18",
+      "label": "RIGHT",
+      "repeat": 1,
+      "onset_sec": 138.0,
+      "duration_sec": 10.0,
+      "marker": "EOG|reconstructed-sesh2_team10_2026-11-07_|18|RIGHT",
+      "lsl_timestamp": null
+    },
+    {
+      "trial_id": "19",
+      "label": "CENTER",
+      "repeat": 1,
+      "onset_sec": 148.0,
+      "duration_sec": 6,
+      "marker": "EOG|reconstructed-sesh2_team10_2026-11-07_|19|CENTER",
+      "lsl_timestamp": null
+    },
+    {
+      "trial_id": "20",
+      "label": "BLINK",
+      "repeat": 1,
+      "onset_sec": 154.0,
+      "duration_sec": 6,
+      "marker": "EOG|reconstructed-sesh2_team10_2026-11-07_|20|BLINK",
+      "lsl_timestamp": null
+    },
+    {
+      "trial_id": "21",
+      "label": "CENTER",
+      "repeat": 2,
+      "onset_sec": 160.0,
+      "duration_sec": 6,
+      "marker": "EOG|reconstructed-sesh2_team10_2026-11-07_|21|CENTER",
+      "lsl_timestamp": null
+    },
+    {
+      "trial_id": "22",
+      "label": "UP",
+      "repeat": 2,
+      "onset_sec": 166.0,
+      "duration_sec": 10.0,
+      "marker": "EOG|reconstructed-sesh2_team10_2026-11-07_|22|UP",
+      "lsl_timestamp": null
+    },
+    {
+      "trial_id": "23",
+      "label": "CENTER",
+      "repeat": 2,
+      "onset_sec": 176.0,
+      "duration_sec": 6,
+      "marker": "EOG|reconstructed-sesh2_team10_2026-11-07_|23|CENTER",
+      "lsl_timestamp": null
+    },
+    {
+      "trial_id": "24",
+      "label": "DOWN",
+      "repeat": 2,
+      "onset_sec": 182.0,
+      "duration_sec": 10.0,
+      "marker": "EOG|reconstructed-sesh2_team10_2026-11-07_|24|DOWN",
+      "lsl_timestamp": null
+    },
+    {
+      "trial_id": "25",
+      "label": "CENTER",
+      "repeat": 2,
+      "onset_sec": 192.0,
+      "duration_sec": 6,
+      "marker": "EOG|reconstructed-sesh2_team10_2026-11-07_|25|CENTER",
+      "lsl_timestamp": null
+    },
+    {
+      "trial_id": "26",
+      "label": "RIGHT",
+      "repeat": 2,
+      "onset_sec": 198.0,
+      "duration_sec": 10.0,
+      "marker": "EOG|reconstructed-sesh2_team10_2026-11-07_|26|RIGHT",
+      "lsl_timestamp": null
+    },
+    {
+      "trial_id": "27",
+      "label": "CENTER",
+      "repeat": 2,
+      "onset_sec": 208.0,
+      "duration_sec": 6,
+      "marker": "EOG|reconstructed-sesh2_team10_2026-11-07_|27|CENTER",
+      "lsl_timestamp": null
+    },
+    {
+      "trial_id": "28",
+      "label": "LEFT",
+      "repeat": 2,
+      "onset_sec": 214.0,
+      "duration_sec": 10.0,
+      "marker": "EOG|reconstructed-sesh2_team10_2026-11-07_|28|LEFT",
+      "lsl_timestamp": null
+    },
+    {
+      "trial_id": "29",
+      "label": "CENTER",
+      "repeat": 2,
+      "onset_sec": 224.0,
+      "duration_sec": 6,
+      "marker": "EOG|reconstructed-sesh2_team10_2026-11-07_|29|CENTER",
+      "lsl_timestamp": null
+    },
+    {
+      "trial_id": "30",
+      "label": "BLINK",
+      "repeat": 2,
+      "onset_sec": 230.0,
+      "duration_sec": 6,
+      "marker": "EOG|reconstructed-sesh2_team10_2026-11-07_|30|BLINK",
+      "lsl_timestamp": null
+    },
+    {
+      "trial_id": "31",
+      "label": "CENTER",
+      "repeat": 2,
+      "onset_sec": 236.0,
+      "duration_sec": 6,
+      "marker": "EOG|reconstructed-sesh2_team10_2026-11-07_|31|CENTER",
+      "lsl_timestamp": null
+    }
+  ],
+  "end_marker": "EOG|reconstructed-sesh2_team10_2026-11-07_|END|END",
+  "duration_sec": 242.0,
+  "screen": null,
+  "marker_mode": "none",
+  "clock": "reconstructed: nominal protocol durations, not measured GUI onsets",
+  "recording_control": "external",
+  "reconstructed": true,
+  "alignment_estimate": {
+    "offset_sec": 4.52,
+    "r": 0.547,
+    "hold_sec": 10.0,
+    "method": "template match on F8-F7"
+  },
+  "note": "Built by estimate_offset.py because the GUI session JSON was unavailable."
+}

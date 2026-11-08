@@ -1,0 +1,210 @@
+{
+  "schema_version": 1,
+  "processing_version": "causal-eog-v1",
+  "created_utc": "2026-11-07T23:47:04.609339+00:00",
+  "units": {
+    "amplitude": "uV",
+    "variance": "uV^2"
+  },
+  "sfreq_hz": 500.0,
+  "reference": "CPz",
+  "reference_verification": "operator supplied; confirm acquisition settings",
+  "processing": {
+    "lowpass_hz": 5.0,
+    "highpass_hz": null,
+    "filter_order": 4,
+    "warmup_sec": 2.0,
+    "window_sec": 3.0,
+    "recent_sec": 0.2,
+    "step_sec": 0.1,
+    "dwell_sec": 3.0,
+    "gap_sec": 0.05,
+    "hysteresis_ratio": 0.8,
+    "baseline_track_sec": 2.0,
+    "baseline_rescue_sec": 15.0
+  },
+  "baseline_uv": [
+    -9032.825324694759,
+    -2222.5448820672436
+  ],
+  "variance_limits_uv2": [
+    516.4765914591303,
+    757.9661350281467
+  ],
+  "directions": {
+    "RIGHT": {
+      "axis": 0,
+      "polarity": 1,
+      "threshold_uv": 136.0015088218767,
+      "training_margin_uv": 218.09916265260236
+    },
+    "LEFT": {
+      "axis": 0,
+      "polarity": -1,
+      "threshold_uv": 144.9676329343412,
+      "training_margin_uv": 181.6209802890874
+    }
+  },
+  "channel_map": {
+    "F7": "F7",
+    "F8": "F8",
+    "Fp1": "Fp1",
+    "Fp2": "Fp2"
+  },
+  "axes": {
+    "horizontal": "F8 - F7",
+    "vertical": "(Fp1 + Fp2) / 2"
+  },
+  "source": {
+    "path": "C:\\Users\\15715\\Projects\\bci-hackathon\\data\\session2\\sesh2_team10_2026-11-07_17-54-41.cnt",
+    "format": "cnt",
+    "channels": {
+      "F7": "F7",
+      "F8": "F8",
+      "Fp1": "Fp1",
+      "Fp2": "Fp2"
+    },
+    "sfreq_hz": 500.0,
+    "samples": 124134,
+    "source_highpass_hz": 0.0,
+    "source_lowpass_hz": 250.0
+  },
+  "session": {
+    "session_id": "reconstructed-sesh2_team10_2026-11-07_",
+    "screen": null,
+    "alignment": {
+      "method": "operator_verified_offset",
+      "offset_sec": 4.52
+    },
+    "held_out_repeat": 2,
+    "skipped_repeats": 1,
+    "settle_sec": 2.0,
+    "trim_end_sec": 0.25
+  },
+  "quality": {
+    "passed": true,
+    "minimum_required_recall": 0.8,
+    "per_class": {
+      "CENTER": {
+        "windows": 143,
+        "recall": 1.0
+      },
+      "RIGHT": {
+        "windows": 47,
+        "recall": 1.0
+      },
+      "LEFT": {
+        "windows": 47,
+        "recall": 1.0
+      }
+    },
+    "confusion": {
+      "CENTER": {
+        "CENTER": 143
+      },
+      "RIGHT": {
+        "RIGHT": 47
+      },
+      "LEFT": {
+        "LEFT": 47
+      }
+    },
+    "held_out_trial_accuracy": 1.0,
+    "trials": {
+      "21": {
+        "truth": "CENTER",
+        "prediction": "CENTER",
+        "correct": true
+      },
+      "22": {
+        "truth": "CENTER",
+        "prediction": "CENTER",
+        "correct": true
+      },
+      "23": {
+        "truth": "CENTER",
+        "prediction": "CENTER",
+        "correct": true
+      },
+      "24": {
+        "truth": "CENTER",
+        "prediction": "CENTER",
+        "correct": true
+      },
+      "25": {
+        "truth": "CENTER",
+        "prediction": "CENTER",
+        "correct": true
+      },
+      "26": {
+        "truth": "RIGHT",
+        "prediction": "RIGHT",
+        "correct": true
+      },
+      "27": {
+        "truth": "CENTER",
+        "prediction": "CENTER",
+        "correct": true
+      },
+      "28": {
+        "truth": "LEFT",
+        "prediction": "LEFT",
+        "correct": true
+      },
+      "29": {
+        "truth": "CENTER",
+        "prediction": "CENTER",
+        "correct": true
+      },
+      "30": {
+        "truth": "CENTER",
+        "prediction": "CENTER",
+        "correct": true
+      },
+      "31": {
+        "truth": "CENTER",
+        "prediction": "CENTER",
+        "correct": true
+      }
+    },
+    "neutral_false_direction_rate": 0.0,
+    "note": "Overlapping windows are correlated. Entire final repetition is held out; these metrics are not an independent clinical or deployment validation.",
+    "behavior": {
+      "passed": true,
+      "directional_trial_recall": 1.0,
+      "false_activation_count": 0,
+      "false_activations": [],
+      "first_activation_latency_sec": [
+        6.078000000000003,
+        7.877999999999986
+      ],
+      "mean_first_activation_latency_sec": 6.977999999999994,
+      "detections_by_trial": {
+        "21": [],
+        "22": [],
+        "23": [],
+        "24": [],
+        "25": [],
+        "26": [
+          {
+            "time_sec": 208.598,
+            "direction": "RIGHT",
+            "latency_sec": 6.078000000000003
+          }
+        ],
+        "27": [],
+        "28": [
+          {
+            "time_sec": 226.398,
+            "direction": "LEFT",
+            "latency_sec": 7.877999999999986
+          }
+        ],
+        "29": [],
+        "30": [],
+        "31": []
+      },
+      "acceptance": "Required directional-trial recall and zero wrong/neutral/blink activations on the held-out repetition."
+    }
+  }
+}

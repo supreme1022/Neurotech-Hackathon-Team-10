@@ -1,5 +1,11 @@
 ﻿# PhoniFide: How to run the EEG pipeline
 
+> **About this branch.** `drift-tracking` is the pipeline as of commit 9f8e111 plus the causal
+> drift-tracking additions (baseline tracking, horizontal-only calibration, settling-repetition
+> skip, `estimate_offset.py`) that produced the results quoted in the main README. The saved
+> outputs of those runs are in `results/sesh2/`. The `signal-processing` branch continued
+> separately with an offline recovery mode for the same recording.
+
 **Record the eyes following the dot → create a calibration file → replay the EEG to see predicted gaze directions.**
 
 ## 1. Open the project
@@ -86,6 +92,42 @@ Use the same reference as step 4. This replays your saved recording and shows th
 - Press **Ctrl+C** to stop early.
 
 To classify another CNT recording from the same participant and cap setup, replace `recording.cnt` in this command with that file's name. Keep the same sampling rate, acquisition settings, and reference.
+
+## Session 2 recipe (Nov 7, 5:54 PM recording): what actually worked
+
+The 4-minute recording (`recording.cnt` in this branch, the same file as on the
+`signal-processing` branch) needed three things the default pipeline does not do. All three are options that
+default to the original behaviour, and the test suite covers them (`tests/test_drift.py`).
+
+1. **No session JSON, no measured offset.** `estimate_offset.py` matches the horizontal eye
+   signal against the dot schedule and found the default protocol (10 s holds) starting
+   **4.52 s** into the recording (r = +0.55). It writes a reconstructed session file.
+2. **Electrode drift.** The signal drifted about 800 uV over the session, several times the
+   size of a glance, so one fixed baseline cannot work, and a Butterworth high-pass destroys
+   10-second holds. `--baseline-track 2` lets the baseline follow the signal only while gaze
+   is at CENTER (frozen during a glance). Live, it starts from the first window and
+   `--baseline-rescue 15` re-centres if a "glance" lasts longer than any real one.
+3. **The first repetition is settling time.** Fresh gel drifted about 20 uV/s during the
+   first minute, which no tracker can follow. `--skip-repeats 1` fits on repetition 2 and
+   holds out repetition 3. UP/DOWN are not separable on this cap (frontal vertical signal is
+   swamped by blinks and drift), so calibrate horizontal only with `--directions RIGHT,LEFT`.
+
+```powershell
+python estimate_offset.py recording.cnt --output output/sesh2_session.json --plot output/sesh2_match.png
+python calibration.py recording.cnt --session output/sesh2_session.json --reference CPz --offset 4.52 --directions RIGHT,LEFT --baseline-track 2 --baseline-rescue 15 --skip-repeats 1 --output output/sesh2_calibration.json
+python real_time_classification.py playback recording.cnt --calibration output/sesh2_calibration.json --reference CPz --plot
+```
+
+Result on the held-out repetition: 100% window recall for CENTER, RIGHT and LEFT, and the
+live classifier detected 2/2 glances with 0 false activations. Replaying the whole recording:
+repetitions 2 and 3 gave 4/4 glances, 0 false activations, about 6 s after the dot moved
+(3 s window + 3 s dwell). Repetition 1 (settling) gave 2 false LEFT calls, so live sessions
+should wait a minute after the cap goes on before trusting detections. Thresholds came out
+near +136 uV (RIGHT) and -145 uV (LEFT); glances measured roughly +190 / -200 uV.
+
+The files these commands produced are in `results/sesh2/` (reconstructed session file,
+calibration JSON and report, diagnostics plot, offset-match plot, playback log and prediction
+summary), so the numbers above can be checked without re-running anything.
 
 ## If something goes wrong
 

@@ -19,6 +19,7 @@ from eog_pipeline import (
 RESULT_FIELDS = (
     "time_sec", "quality", "candidate", "state", "dwell_sec", "activated",
     "h_mean_uv", "v_mean_uv", "h_variance_uv2", "v_variance_uv2",
+    "h_baseline_uv", "v_baseline_uv",
 )
 
 

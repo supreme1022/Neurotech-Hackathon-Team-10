@@ -37,6 +37,13 @@ class ProcessingConfig:
     dwell_sec: float = 3.0
     gap_sec: float = 0.05
     hysteresis_ratio: float = 0.8
+    # Optional drift tracking: while the classifier sees a stable CENTER, the baseline
+    # follows the measured signal with this time constant. None keeps the fixed
+    # calibrated baseline (original behaviour).
+    baseline_track_sec: float | None = None
+    # With tracking: a direction held longer than this is taken as drift, not gaze,
+    # and the baseline re-centres on the current signal. None disables the rescue.
+    baseline_rescue_sec: float | None = None
 
     def validate(self, sfreq):
         sfreq = finite_number(sfreq, "Sampling frequency")
@@ -52,6 +59,14 @@ class ProcessingConfig:
             raise ValueError("filter_order must be an integer between 1 and 8.")
         if not 0 < finite_number(self.hysteresis_ratio, "hysteresis_ratio") <= 1:
             raise ValueError("hysteresis_ratio must be in (0, 1].")
+        if self.baseline_track_sec is not None and finite_number(
+                self.baseline_track_sec, "baseline_track_sec") < self.step_sec:
+            raise ValueError("baseline_track_sec must be at least step_sec.")
+        if self.baseline_rescue_sec is not None:
+            if self.baseline_track_sec is None:
+                raise ValueError("baseline_rescue_sec requires baseline_track_sec.")
+            if finite_number(self.baseline_rescue_sec, "baseline_rescue_sec") <= self.dwell_sec:
+                raise ValueError("baseline_rescue_sec must exceed dwell_sec.")
         if self.lowpass_hz >= sfreq / 2:
             raise ValueError("Low-pass cutoff must be below Nyquist.")
         if self.highpass_hz is not None:
@@ -169,6 +184,7 @@ class Feature:
     variance_uv2: list | None = None
     recent_mean_uv: list | None = None
     window_start_sec: float | None = None
+    baseline_uv: list | None = None  # label-guided tracked baseline during calibration
 
 
 class FeatureStream:
@@ -270,8 +286,9 @@ def calibration_model(model):
     for value in model["variance_limits_uv2"]:
         if finite_number(value, "Variance limit") <= 0:
             raise ValueError("Variance limits must be positive.")
-    if set(model["directions"]) != set(DIRECTIONS):
-        raise ValueError("Calibration must contain all four directions.")
+    if not model["directions"] or set(model["directions"]) - set(DIRECTIONS):
+        raise ValueError("Calibration directions must be a non-empty subset of "
+                         f"{DIRECTIONS}.")
     for name, rule in model["directions"].items():
         if rule["axis"] != (0 if name in ("RIGHT", "LEFT") else 1):
             raise ValueError(f"Incorrect axis for {name}.")
@@ -280,9 +297,15 @@ def calibration_model(model):
         if finite_number(rule["threshold_uv"], "Direction threshold") <= 0:
             raise ValueError("Direction thresholds must be positive.")
     for a, b in (("RIGHT", "LEFT"), ("UP", "DOWN")):
-        if model["directions"][a]["polarity"] == model["directions"][b]["polarity"]:
+        if (a in model["directions"] and b in model["directions"] and
+                model["directions"][a]["polarity"] == model["directions"][b]["polarity"]):
             raise ValueError(f"{a} and {b} must have opposite polarity.")
     return model
+
+
+def model_axes(model):
+    """Axes (0 horizontal, 1 vertical) that the calibrated directions actually use."""
+    return sorted({rule["axis"] for rule in model["directions"].values()})
 
 
 def check_compatibility(model, sfreq, reference):
@@ -294,8 +317,9 @@ def check_compatibility(model, sfreq, reference):
         raise ValueError("Acquisition reference differs from calibration.")
 
 
-def direction_for(mean_uv, model, previous=None):
-    centered = np.asarray(mean_uv) - model["baseline_uv"]
+def direction_for(mean_uv, model, previous=None, baseline=None):
+    base = model["baseline_uv"] if baseline is None else baseline
+    centered = np.asarray(mean_uv, dtype=float) - np.asarray(base, dtype=float)
     matches = []
     for label, rule in model["directions"].items():
         threshold = rule["threshold_uv"]
@@ -308,13 +332,15 @@ def direction_for(mean_uv, model, previous=None):
     return matches[0] if matches else "CENTER"
 
 
-def candidate_for(feature, model, previous=None, recent=False):
+def candidate_for(feature, model, previous=None, recent=False, baseline=None):
     if feature.quality != "OK":
         return feature.quality
-    if np.any(np.asarray(feature.variance_uv2) > model["variance_limits_uv2"]):
+    axes = model_axes(model)  # a horizontal-only model ignores vertical (blink) variance
+    if np.any(np.asarray(feature.variance_uv2)[axes] >
+              np.asarray(model["variance_limits_uv2"])[axes]):
         return "TRANSITION_BLINK"
     return direction_for(feature.recent_mean_uv if recent else feature.mean_uv,
-                         model, previous)
+                         model, previous, baseline)
 
 
 class DwellClassifier:
@@ -323,6 +349,15 @@ class DwellClassifier:
     def __init__(self, model):
         self.model = calibration_model(model)
         self.config = ProcessingConfig(**model["processing"])
+        # Drift tracking starts from the calibrated baseline and survives resets:
+        # a gap in the data does not change where the electrodes have drifted to.
+        self.baseline = np.asarray(model["baseline_uv"], dtype=float)
+        track = self.config.baseline_track_sec
+        self.alpha = min(1.0, self.config.step_sec / track) if track else 0.0
+        self.rescue = self.config.baseline_rescue_sec
+        # With tracking, the absolute level of the calibration recording means nothing
+        # today: the baseline is taken from the first live window (user looking at CENTER).
+        self.initialized = not self.alpha
         self.reset()
 
     def reset(self):
@@ -337,10 +372,23 @@ class DwellClassifier:
                 (self.last_time is not None and
                  feature.time_sec - self.last_time > self.config.step_sec * 2.5)):
             self.reset()
-        candidate = candidate_for(feature, self.model, self.candidate)
-        recent = candidate_for(feature, self.model, self.candidate, recent=True)
+        if not self.initialized and feature.quality == "OK":
+            self.baseline = np.asarray(feature.mean_uv, dtype=float)
+            self.initialized = True
+        candidate = candidate_for(feature, self.model, self.candidate, baseline=self.baseline)
+        recent = candidate_for(feature, self.model, self.candidate, recent=True,
+                               baseline=self.baseline)
+        if self.alpha and candidate == "CENTER" and recent == "CENTER":
+            # Stable neutral gaze: let the baseline follow slow electrode drift.
+            self.baseline = self.baseline + self.alpha * (
+                np.asarray(feature.mean_uv, dtype=float) - self.baseline)
         if candidate in DIRECTIONS and recent != candidate:
             candidate = "TRANSITION"
+        if candidate in DIRECTIONS and self.rescue and self.candidate == candidate and \
+                feature.time_sec - self.since > self.rescue:
+            # Nobody holds a glance this long: the electrodes drifted. Re-centre on now.
+            self.baseline = np.asarray(feature.mean_uv, dtype=float)
+            candidate = "RECENTERED"
         if candidate in DIRECTIONS:
             if candidate != self.candidate:
                 self.since = feature.time_sec
@@ -367,6 +415,8 @@ class DwellClassifier:
             "v_mean_uv": feature.mean_uv[1] if feature.mean_uv else None,
             "h_variance_uv2": feature.variance_uv2[0] if feature.variance_uv2 else None,
             "v_variance_uv2": feature.variance_uv2[1] if feature.variance_uv2 else None,
+            "h_baseline_uv": float(self.baseline[0]),
+            "v_baseline_uv": float(self.baseline[1]),
         }
 
 
