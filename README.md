@@ -123,7 +123,8 @@ holds, 3 repetitions).
 **User value.** A learner who cannot read, speak or use their hands gets a way to practise
 that gives instant feedback, and a teacher or parent gets a per-learner list of the words
 that keep failing, with hesitation times. For a non-speaking user the same mechanism is a
-yes/no channel.
+yes/no channel. The web app gives each role its own door (student code, parent, educator)
+and a progress dashboard with lessons finished and practice accuracy.
 
 **Cost and setup.** One EEG headset streaming over LSL, one laptop, saline for the sponges.
 Putting the cap on takes about five minutes; the signal needs about one minute to settle;
@@ -160,12 +161,12 @@ are listed under [Limitations](#limitations) with what we do about each.
 
 | Barrier | Accommodation | Where it is |
 |---|---|---|
-| Cannot read yet | Prompts are spoken; pictures can sit beside words | game design; read-aloud in `index-2.html` |
+| Cannot read yet | Prompts are spoken; pictures can sit beside words | game design; read-aloud in `index-2.html`; audio prompts setting in the web app onboarding |
 | Dyslexia | Minimal pairs (b/d, was/saw); dyslexia-friendly font, syllable colouring, read-aloud | `index-2.html` |
 | Attention drifts | Engagement meter switches the lesson to read-aloud with bigger text after 20 s of low engagement | `bridge.py` + `index-2.html` |
 | Cannot speak | No voice needed; left/right doubles as yes/no | design |
 | Cannot use hands | No touch; glance and hold, with an optional jaw-clench confirm | design; `bridge.py` |
-| Limited motor control, fatigue | Hold time adjustable; blinks do not count; short sessions | detector parameters |
+| Limited motor control, fatigue | Hold time adjustable; blinks do not count; short sessions | detector parameters; hold-time and sensitivity settings in the web app device setup |
 | Different first language | Spoken prompts can be in any language; pairs built for English learners (ship/sheep, light/right) | content packs |
 | Resources | Runs offline on one laptop; open source; a webcam path where no headset exists | design |
 
@@ -184,6 +185,8 @@ protocol, to measure how much movement the detector tolerates.
 
 ```
 README.md                 this file
+@latest/                  PhoniFide web app: landing page, onboarding (learning profile, device setup), lesson UI
+                          (React + TypeScript + Vite + Tailwind)
 index-2.html              adaptive reading-lesson web prototype
 bridge.py                 EEG -> browser bridge: live engagement, jaw-clench and gaze events for index-2.html
 signal-processing branch  EOG calibration + classification pipeline, tests, docs and the recordings
@@ -195,8 +198,36 @@ drift-tracking branch     the same pipeline + causal drift-tracking baseline, es
 ANT eego 24-ch  --Wi-Fi / LSL-->  bridge.py  --ws://localhost:8765-->  index-2.html
                                   engagement, clench, gaze               lesson adapts, clench selects
 
+@latest/ web app (onboarding, lesson UI, dashboard)   <-- next step: the same bridge.py events
+
 recording.cnt  -->  calibration.py  -->  calibration.json  -->  real_time_classification.py
                     thresholds + quality gates                   playback_directions.py  -->  left / right
+```
+
+### `@latest/`: the PhoniFide web app
+
+The product front end, built with React 19, TypeScript, Vite and Tailwind. Routes:
+
+- `/` landing page: audio-guided lessons, adaptive learning, progress tracking, the learning
+  gap it addresses, and a section for educators.
+- `/get-started`: three ways in: student (enter a student code), parent, educator.
+- `/onboarding/learning-profile`: learner name and goals (letter sounds, word reading,
+  listening and focus, reading confidence).
+- `/onboarding/device-setup`: headset connection, signal quality, a calibration preview (look
+  left, look right, hold steady), sensitivity and hold-time settings, audio prompts on or off.
+- `/onboarding/ready` and `/lesson`: a phonics lesson with two picture choices, "look left or
+  right, then hold steady", and correct / try-again feedback.
+- A student dashboard (lessons finished, practice accuracy, recommended practice) and a
+  lesson-session view with an eye-tracking indicator are built and not yet routed.
+
+The pages are a UI prototype: choices are selected by click and the headset panels show
+placeholder values. Wiring them to the `bridge.py` gaze and engagement events, the way
+`index-2.html` already is, is the next step; the event format is already defined.
+
+```powershell
+cd @latest
+npm install
+npm run dev          # http://localhost:5173
 ```
 
 ### `signal-processing` branch: the EOG pipeline
@@ -399,6 +430,8 @@ python -m unittest discover -s tests -t .                                  # 44 
 python calibration.py recording.cnt --session output/session.json --reference CPz --offset-range 4 5 --offline-drift --command-calibration --output output/recovered/calibration.json
 python playback_directions.py                                              # prints left / right while replaying recording.cnt
 ```
+
+The web app: `cd @latest`, `npm install`, `npm run dev`, then open http://localhost:5173.
 
 Live EEG: the laptop running the bridge and ANT's acquisition laptop must be on the same
 network (ANT's router or a phone hotspot), with LSL streaming enabled in the eego software.
