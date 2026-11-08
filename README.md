@@ -2,7 +2,7 @@
 
 **Hands-free, voice-free learning, controlled only by where you look.**
 
-PhoniFide is a two-choice learning game for people who cannot easily read, type, tap or
+PhoniFide is a two-choice learning system for people who cannot easily read, type, tap or
 speak. A prompt is spoken out loud, two answers appear far left and far right, and the
 learner answers by holding a glance on one of them. The glance is read from an EEG headset
 as eye movement (electro-oculography, EOG) on the electrodes beside the eyes, so the only
