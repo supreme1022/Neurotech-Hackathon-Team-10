@@ -81,9 +81,6 @@ focus and alertness signals that a webcam cannot see.
 - **Two choices by design.** Left/right is the one axis an EEG cap reads cleanly, so the
   content is built as pairs: b/d, was/saw, ship/sheep, yes/no. That matches how phonics and
   minimal-pair practice already work.
-- **The headset earns its place.** A camera could read a glance too, but a camera cannot see
-  attention or a jaw clench. `bridge.py` already turns the same stream into an engagement
-  score that adapts the lesson and a clench that confirms a choice, with no extra hardware.
 - **Built to survive real electrodes.** Instead of assuming a clean signal, the detector
   re-centres before every question and tracks drift while the eyes are still, with a
   pass/fail calibration so a bad setup is reported instead of silently misread.
