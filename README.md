@@ -223,8 +223,10 @@ The product front end, built with React 19, TypeScript, Vite and Tailwind. Route
 - A student dashboard (lessons finished, practice accuracy, recommended practice) and a
   lesson-session view with an eye-tracking indicator are built and not yet routed.
 
-The pages are a UI prototype: choices are selected by click and the headset panels show
-placeholder values. Wiring them to the `bridge.py` gaze and engagement events, the way
+The pages are a UI prototype: choices are selected by click, the headset panels show
+placeholder values, and the lesson page can play a scripted timeline (`timings.csv`, the
+direction schedule of our recorded session) for demo videos. That playback is a script, not
+live EEG, and is labelled as such wherever it is shown. Wiring them to the `bridge.py` gaze and engagement events, the way
 `index-2.html` already is, is the next step; the event format is already defined.
 
 ```powershell
