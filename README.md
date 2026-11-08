@@ -7,8 +7,8 @@ A prompt is spoken out loud, two answers appear far left and far right, and the 
 answers by holding a glance on one of them. The glance is read from an EEG headset as eye
 movement (electro-oculography, EOG) on the electrodes beside the eyes, so it needs no hands,
 no voice, no reading and no camera. That opens it to the people most learning tools leave
-out: children learning phonics who cannot read the instructions yet; learners with dyslexia
-; immigrants learning a new language one word pair at a time; people
+out: children learning phonics who cannot read the instructions yet; learners with dyslexia;
+immigrants learning a new language one word pair at a time; people
 with speech differences or facial injuries that defeat voice interfaces; and people living
 with paralysis, ALS or locked-in syndrome, for whom the same left/right glance becomes yes/no,
 a way to pick phrases, and a way to keep learning. Every answer is logged with how long the
